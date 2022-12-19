@@ -64,6 +64,9 @@ _rotacionExamen rotacionExamen;
 
 int estadoRaton, xc, yc;
 
+float factor = 1.0;
+float Ancho = Window_width, Alto = Window_high;
+int cambioAOrto = 0;
 // boolean
 
 bool hay_animacion = false;
@@ -84,7 +87,10 @@ void change_projection() {
   // formato(x_minimo,x_maximo, y_minimo, y_maximo,plano_delantero,
   // plano_traser)
   //  plano_delantero>0  plano_trasero>PlanoDelantero)
-  glFrustum(-Size_x, Size_x, -Size_y, Size_y, Front_plane, Back_plane);
+  glFrustum(-Size_x * factor, Size_x * factor, -Size_y * factor,
+            Size_y * factor, Front_plane, Back_plane);
+
+  // HACER MULTPLICAR POR UN FACTOR
 }
 
 //**************************************************************************
@@ -95,7 +101,7 @@ void change_observer() {
   // posicion del observador
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glTranslatef(0, 0, -Observer_distance);
+  glTranslatef(0, 0, -Observer_distance);  // cambiar centro de proyección
   glRotatef(Observer_angle_x, 1, 0, 0);
   glRotatef(Observer_angle_y, 0, 1, 0);
 }
@@ -180,6 +186,42 @@ void draw_objects() {
   }
 }
 
+void vista_orto() {
+  // Primera vista
+  glViewport(Ancho / 2, Alto / 2, Ancho / 2, Alto / 2);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(-5 * factor, 5 * factor, -5 * factor, 5 * factor, -100, 100);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  draw_axis();
+  draw_objects();
+
+  // Segunda vista Planta
+  glViewport(0, Alto / 2, Ancho / 2, Alto / 2);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(-5 * factor, 5 * factor, -5 * factor, 5 * factor, -100, 100);
+
+  glRotatef(90, 1, 0, 0);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  draw_axis();
+  draw_objects();
+
+  // Tercera vista (abajo izq)
+  glViewport(0, 0, Ancho / 2, Alto / 2);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(-5 * factor, 5 * factor, -5 * factor, 5 * factor, -100, 100);
+  glRotatef(90, 0, 1, 0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  draw_axis();
+  draw_objects();
+}
 //***************************************************************************
 // luces
 //***************************************************************************
@@ -231,13 +273,21 @@ void luces(float mov_cam_1, bool activar_cam_2) {
 void draw(void) {
   glDrawBuffer(GL_FRONT);
   clean_window();
-  change_observer();
   luces(mov_camara, act_cam_2);
-  draw_axis();
-  draw_objects();
+
   // glutSwapBuffers(); // no vamos a utilizar el doble buffer
 
-  glFlush();  // ahora se copia dos veces | trasero + delantero
+
+  if (cambioAOrto == 0) {
+    glViewport(0, 0, Ancho, Alto);  // esto solo se haria en el inicialize sino
+                                    // entonces se pierde lo q estaba
+    change_projection();
+    change_observer();
+
+    draw_axis();
+    draw_objects();
+  } else
+    vista_orto();
 
   if (t_objeto == AMETRALLADORA) {
     glDrawBuffer(GL_BACK);
@@ -362,6 +412,10 @@ void normal_key(unsigned char Tecla1, int x, int y) {
       break;
     case '6':
       modo = SOLID_SMOOTH;
+      break;
+    case '9':
+      cambioAOrto += 1;
+      cambioAOrto %= 2;
       break;
 
     case 'P':
@@ -641,6 +695,15 @@ void clickRaton(int boton, int estado, int x, int y) {
       yc = y;
       pick_color(xc, yc);
     }
+  }
+
+  if (boton == 3) {
+    factor *= 1.1;
+    glutPostRedisplay();
+  }
+  if (boton == 4) {
+    factor *= 0.9;
+    glutPostRedisplay();
   }
 }
 
