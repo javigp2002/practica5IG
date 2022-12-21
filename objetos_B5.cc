@@ -741,9 +741,9 @@ void _rotacion::parametros(vector<_vertex3f> perfil, int num, int tipo,
     normales_vertices.resize(n_v);
 
     for (int i = 0; i < n_v; i++) {
-      norma = sqrt(vertices[i].x * vertices[i].x +
-                   vertices[i].y * vertices[i].y +
-                   vertices[i].z * vertices[i].z);
+      norma =
+          sqrt(vertices[i].x * vertices[i].x + vertices[i].y * vertices[i].y +
+               vertices[i].z * vertices[i].z);
 
       normales_vertices[i].x = vertices[i].x / norma;
       normales_vertices[i].y = vertices[i].y / norma;
@@ -1299,10 +1299,31 @@ _housing::_housing() {
   cilindro.cambiarMaterial(gold);
   cubo.cambiarMaterial(gold);
   cono.cambiarMaterial(gold);
+
+  // seleccion
+  int color = 80;
+  piezas = 9;  // numero de piezas
+  grosor_select = 2;
+  color_pick = _vertex3f(0.0, 1.0, 0.0);  // verde
+  color_select.resize(piezas);
+  activo.resize(piezas);
+
+  for (int i = 0; i < piezas; i++) {
+    activo[i] = 0;
+    color_select[i].r = color_select[i].g = color_select[i].b =
+        color;  // tono de gris
+    color += 10;
+  }
 }
 
 void _housing::draw(_modo modo, float r, float g, float b, float grosor,
                     float giro_mira) {
+  // p5
+  float r_p, g_p, b_p;  // p = pick
+  r_p = color_pick.r;
+  g_p = color_pick.g;
+  b_p = color_pick.b;
+
   // // Todos estos vienen "heredados del cañon"
 
   float altoEmbCanion = alto / 48;
@@ -1313,7 +1334,11 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
   float radioB = radioEmbCanion + 0.02;
 
   // base
-  introduceRotationModule(0, 0, 0, radioB, altoB, modo, r, g, b, grosor);
+  if (activo[0] == 1)
+    introduceRotationModule(0, 0, 0, radioB, altoB, EDGES, r_p, g_p, b_p,
+                            grosor_select);
+  else
+    introduceRotationModule(0, 0, 0, radioB, altoB, modo, r, g, b, grosor);
 
   // trasera base
 
@@ -1321,9 +1346,12 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
   float transZBAtras =
       -(altoB * ALTURACILINDRO) / 2.0 - (altoBAtras * ALTURACILINDRO) / 2;
 
-  introduceRotationModule(0, 0, transZBAtras, radioEmbCanion, altoBAtras, modo,
-                          r, g, b, grosor);
-
+  if (activo[1])
+    introduceRotationModule(0, 0, transZBAtras, radioEmbCanion, altoBAtras,
+                            EDGES, r_p, g_p, b_p, grosor_select);
+  else
+    introduceRotationModule(0, 0, transZBAtras, radioEmbCanion, altoBAtras,
+                            modo, r, g, b, grosor);
   // cono embellecedor
   float alturaCono = 3;
   float transXCono = 0;
@@ -1337,7 +1365,10 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
                transZCono);  // transladar de manera que quede bien
   glScalef(radioCono, radioCono, altoCono);
   glRotatef(270, 1, 0, 0);
-  cono.draw(modo, r, g, b, grosor);
+  if (activo[2])
+    cono.draw(EDGES, r_p, g_p, b_p, grosor_select);
+  else
+    cono.draw(modo, r, g, b, grosor);
   glPopMatrix();
 
   // embellecedor palo
@@ -1348,9 +1379,13 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
                         (altoPaloEmb * ALTURACILINDRO) / 2;
   float radioPaloEmb = radioB / 6;
 
-  introduceRotationModule(transXPaloEmb, transYPaloEmb, transZPaloEmb,
-                          radioPaloEmb, altoPaloEmb, modo, r, g, b, grosor);
-
+  if (activo[3])
+    introduceRotationModule(transXPaloEmb, transYPaloEmb, transZPaloEmb,
+                            radioPaloEmb, altoPaloEmb, EDGES, r_p, g_p, b_p,
+                            grosor_select);
+  else
+    introduceRotationModule(transXPaloEmb, transYPaloEmb, transZPaloEmb,
+                            radioPaloEmb, altoPaloEmb, modo, r, g, b, grosor);
   // tubo cargador
 
   float transXTuboExt = -(3 * (radioB * (RADIOCILINDRO * 2) / 2) / 4.0);
@@ -1359,8 +1394,13 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
   float radioTuboExt = radioB / 2.5;
   float altoTuboExt = alto / 3.5;
 
-  introduceRotationModule(transXTuboExt, transYTuboExt, transZTuboExt,
-                          radioTuboExt, altoTuboExt, modo, r, g, b, grosor);
+  if (activo[4])
+    introduceRotationModule(transXTuboExt, transYTuboExt, transZTuboExt,
+                            radioTuboExt, altoTuboExt, EDGES, r_p, g_p, b_p,
+                            grosor_select);
+  else
+    introduceRotationModule(transXTuboExt, transYTuboExt, transZTuboExt,
+                            radioTuboExt, altoTuboExt, modo, r, g, b, grosor);
 
   // trasera tubo cargador
   float transXTuboExtAtras = transXTuboExt;
@@ -1371,16 +1411,26 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
                              (altoTuboExtAtras * ALTURACILINDRO) / 2.0;
   float radioTuboExtAtras = radioTuboExt - 0.02;
 
-  introduceRotationModule(transXTuboExtAtras, transYTuboExtAtras,
-                          transZTuboExtAtras, radioTuboExtAtras,
-                          altoTuboExtAtras, modo, r, g, b, grosor);
-
+  if (activo[5])
+    introduceRotationModule(transXTuboExtAtras, transYTuboExtAtras,
+                            transZTuboExtAtras, radioTuboExtAtras,
+                            altoTuboExtAtras, EDGES, r_p, g_p, b_p,
+                            grosor_select);
+  else
+    introduceRotationModule(transXTuboExtAtras, transYTuboExtAtras,
+                            transZTuboExtAtras, radioTuboExtAtras,
+                            altoTuboExtAtras, modo, r, g, b, grosor);
   float escalaCargador = 0.7;
   // cargador
   glPushMatrix();
   glTranslatef(2.5 * transXTuboExt, 2 * transYTuboExt, transZTuboExt);
   glScalef(escalaCargador, escalaCargador, 2 * escalaCargador);
-  cargador.draw(modo, r, g, b, grosor);
+
+  if (activo[6])
+    cargador.draw(EDGES, r_p, g_p, b_p, grosor_select);
+  else
+    cargador.draw(modo, r, g, b, grosor);
+
   glPopMatrix();
   // base mango
   float altoBaseMango = alto / 20;
@@ -1391,9 +1441,15 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
                           0.02;  // el cubo tiene tam 1 por def
   float transZBaseMango = (altoB * ALTURACILINDRO) / 2 - fondoBaseMango;
 
-  introduceEmbellecedor(transXBaseMango, transYBaseMango, transZBaseMango,
-                        anchoBaseMango, altoBaseMango, fondoBaseMango, modo, r,
-                        g, b, grosor);
+  if (activo[7])
+
+    introduceEmbellecedor(transXBaseMango, transYBaseMango, transZBaseMango,
+                          anchoBaseMango, altoBaseMango, fondoBaseMango, EDGES,
+                          r_p, g_p, b_p, grosor_select);
+  else
+    introduceEmbellecedor(transXBaseMango, transYBaseMango, transZBaseMango,
+                          anchoBaseMango, altoBaseMango, fondoBaseMango, modo,
+                          r, g, b, grosor);
 
   // partes mango
   float transYMira =
@@ -1408,9 +1464,142 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
   glScalef(escala, escala, escala);
   glRotatef(giro_mira, 1, 0, 0);      // rotacion
   glTranslatef(0, transYMirilla, 0);  // mover punto del medio
-  mira.draw(modo, r, g, b, grosor);
+  if (activo[8])
+    mira.draw(EDGES, r_p, g_p, b_p, grosor_select);
+  else
+    mira.draw(modo, r, g, b, grosor);
+
   glPopMatrix();
 }
+
+void _housing::seleccion(float giro_mira) {
+  // Todos estos vienen "heredados del cañon"
+  _vertex3i color;
+
+  float altoEmbCanion = alto / 48;
+  float radioEmbCanion = radio / 3;
+  // float transembellecedor = -2.1 * alto;
+
+  float altoB = altoEmbCanion + 0.5;
+  float radioB = radioEmbCanion + 0.02;
+
+  // base
+  color = color_select[0];
+  introduceRotationModule(0, 0, 0, radioB, altoB, SELECT, color.r, color.g,
+                          color.b, 1);
+
+  // trasera base
+
+  float altoBAtras = al / 64;
+  float transZBAtras =
+      -(altoB * ALTURACILINDRO) / 2.0 - (altoBAtras * ALTURACILINDRO) / 2;
+
+  color = color_select[1];
+  introduceRotationModule(0, 0, transZBAtras, radioEmbCanion, altoBAtras,
+                          SELECT, color.r, color.g, color.b, 1);
+
+  // cono embellecedor
+  float alturaCono = 3;
+  float transXCono = 0;
+  float transYCono = 0;
+  float altoCono = altoBAtras * 3;
+  float transZCono = transZBAtras - (altoBAtras * ALTURACILINDRO) / 2;
+  float radioCono = radioEmbCanion;
+
+  color = color_select[2];
+
+  glPushMatrix();
+  glTranslatef(transXCono, transYCono,
+               transZCono);  // transladar de manera que quede bien
+  glScalef(radioCono, radioCono, altoCono);
+  glRotatef(270, 1, 0, 0);
+  cono.draw(SELECT, color.r, color.g, color.b, 1);
+  glPopMatrix();
+
+  // embellecedor palo
+  float transXPaloEmb = transXCono;
+  float transYPaloEmb = transYCono;
+  float altoPaloEmb = alto / 8;
+  float transZPaloEmb = transZCono - (altoCono * alturaCono) / 2 -
+                        (altoPaloEmb * ALTURACILINDRO) / 2;
+  float radioPaloEmb = radioB / 6;
+  color = color_select[3];
+
+  introduceRotationModule(transXPaloEmb, transYPaloEmb, transZPaloEmb,
+                          radioPaloEmb, altoPaloEmb, SELECT, color.r, color.g,
+                          color.b, 1);
+
+  // tubo cargador
+
+  float transXTuboExt = -(3 * (radioB * (RADIOCILINDRO * 2) / 2) / 4.0);
+  float transYTuboExt = transXTuboExt;
+  float transZTuboExt = -(altoB * ALTURACILINDRO) / 3.5;
+  float radioTuboExt = radioB / 2.5;
+  float altoTuboExt = alto / 3.5;
+  color = color_select[4];
+
+  introduceRotationModule(transXTuboExt, transYTuboExt, transZTuboExt,
+                          radioTuboExt, altoTuboExt, SELECT, color.r, color.g,
+                          color.b, 1);
+
+  // trasera tubo cargador
+  float transXTuboExtAtras = transXTuboExt;
+  float transYTuboExtAtras = transYTuboExt;
+  float altoTuboExtAtras = alto / 24;
+  float transZTuboExtAtras = transZTuboExt -
+                             (altoTuboExt * ALTURACILINDRO) / 2.0 -
+                             (altoTuboExtAtras * ALTURACILINDRO) / 2.0;
+  float radioTuboExtAtras = radioTuboExt - 0.02;
+  color = color_select[5];
+
+  introduceRotationModule(transXTuboExtAtras, transYTuboExtAtras,
+                          transZTuboExtAtras, radioTuboExtAtras,
+                          altoTuboExtAtras, SELECT, color.r, color.g, color.b,
+                          1);
+
+  float escalaCargador = 0.7;
+
+  color = color_select[6];
+
+  // cargador
+  glPushMatrix();
+  glTranslatef(2.5 * transXTuboExt, 2 * transYTuboExt, transZTuboExt);
+  glScalef(escalaCargador, escalaCargador, 2 * escalaCargador);
+  cargador.draw(SELECT, color.r, color.g, color.b, 1);
+  glPopMatrix();
+  // base mango
+  float altoBaseMango = alto / 20;
+  float fondoBaseMango = alto / 5;
+  float transXBaseMango = 0;
+  float anchoBaseMango = 1.5 * (radioB * 2 * RADIOCILINDRO);
+  float transYBaseMango = (radioB * RADIOCILINDRO) + altoBaseMango / 2 -
+                          0.02;  // el cubo tiene tam 1 por def
+  float transZBaseMango = (altoB * ALTURACILINDRO) / 2 - fondoBaseMango;
+  color = color_select[7];
+
+  introduceEmbellecedor(transXBaseMango, transYBaseMango, transZBaseMango,
+                        anchoBaseMango, altoBaseMango, fondoBaseMango, SELECT,
+                        color.r, color.g, color.b, 1);
+
+  // partes mango
+  float transYMira =
+      transYBaseMango + altoBaseMango / 2 + 0.02;  // 0.5 del alto mirilla
+  float transZMira = transZBaseMango;  // arreglar aqui la mira q funcione bn
+
+  float transYMirilla = 1;  // alto mirilla
+  float escala = 0.5;
+
+  color = color_select[8];
+
+  glPushMatrix();
+
+  glTranslatef(0, transYMira, transZMira);  // pos final
+  glScalef(escala, escala, escala);
+  glRotatef(giro_mira, 1, 0, 0);      // rotacion
+  glTranslatef(0, transYMirilla, 0);  // mover punto del medio
+  mira.draw(SELECT, color.r, color.g, color.b, 1);
+  glPopMatrix();
+};
 
 void _housing::introduceAgarre(float posX, float posY, float posZ, float radio,
                                float alto, _modo modo, float r, float g,
@@ -1686,7 +1875,7 @@ void _ametralladora::draw(_modo modo, float r, float g, float b, float grosor) {
   glRotatef(giro_base, 0, 1, 0);
 
   if (activo[1] == 1)
-    housing.draw(EDGES, r_p, g_p, b_p, grosor_select, giro_mirilla);
+    housing.draw(EDGES, r_p, g_p, b_p, grosor_select);
   else
     housing.draw(modo, r, g, b, grosor, giro_mirilla);
 
@@ -1725,7 +1914,7 @@ void _ametralladora::seleccion() {
 
   glTranslatef(0, 0, 3);
   glRotatef(giro_canion, 0, 0, 1);
-  color = color_select[2];
+  color = color_select[1];
   canon.draw(SELECT, color.r, color.g, color.b, 1);
 
   glPopMatrix();

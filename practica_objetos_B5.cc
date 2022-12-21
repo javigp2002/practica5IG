@@ -293,11 +293,8 @@ void draw(void) {
     glDrawBuffer(GL_BACK);
     clean_window();
     change_observer();
-    // luces(mov_camara, act_cam_2);
-    // draw_axis();
-    // draw_objects();
     ametralladora.seleccion();
-  }
+    }
   glFlush();  // ahora se copia dos veces | trasero + delantero
 }
 
@@ -317,6 +314,9 @@ void change_window_size(int Ancho1, int Alto1) {
   change_projection();
   glViewport(0, 0, Ancho1, Alto1);
   glutPostRedisplay();
+
+  Ancho = Ancho1;
+  Alto = Alto1;
 }
 
 bool estoyDeVuelta = false;
@@ -650,6 +650,19 @@ void procesar_color(unsigned char color[3]) {
       glutPostRedisplay();
     }
   }
+
+  // for (i = 0; i < ametralladora.piezas; i++) {
+  //   if (color[0] == ametralladora.housing.color_select[i].r &&
+  //       color[1] == ametralladora.housing.color_select[i].g &&
+  //       color[2] == ametralladora.housing.color_select[i].r) {
+  //     if (ametralladora.housing.activo[i] == 0) {
+  //       ametralladora.housing.activo[i] = 1;
+  //     } else {
+  //       ametralladora.housing.activo[i] = 0;
+  //     }
+  //     glutPostRedisplay();
+  //   }
+  // }
 }
 
 //***************************************************************************
@@ -712,9 +725,9 @@ void clickRaton(int boton, int estado, int x, int y) {
 void RatonMovido(int x, int y) {
   if (estadoRaton == 1) {
     Observer_angle_y = Observer_angle_y - (x - xc);
-    Observer_angle_x = Observer_angle_x + (y - yc);
-    xc = x;
+    Observer_angle_x = Observer_angle_x + (y - yc); 
     yc = y;
+    xc = x;
     glutPostRedisplay();
   }
 }

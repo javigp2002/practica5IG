@@ -401,6 +401,7 @@ class _cargador : public _triangulos3D {
 class _housing : public _triangulos3D {
  public:
   _housing();
+  void seleccion(float giro_mira); // para hacer la seleccion dentro de ellos
 
   void draw(_modo modo, float r, float g, float b, float grosor,
             float giro_mira = 0.0);
@@ -423,7 +424,12 @@ class _housing : public _triangulos3D {
   float al = 1.5;
   float f = 1;
   float r = 0.45;
-
+  
+  _vertex3f color_pick; // color que voy a pintar 
+  vector<_vertex3i> color_select;
+  vector<int> activo;
+  int piezas;
+  int grosor_select; // grosor linea
  protected:
   _cilindro cilindro, canonSmall, rotationModule, embellecedor;
   _cono cono;
@@ -486,7 +492,7 @@ class _ametralladora : public _triangulos3D {
   int piezas;
   int grosor_select; // grosor linea
   
- protected:
+//  protected:
   _canon canon;
   _sustentacionAmetralladora sustentacion;
   _housing housing;
