@@ -87,8 +87,7 @@ void change_projection() {
   // formato(x_minimo,x_maximo, y_minimo, y_maximo,plano_delantero,
   // plano_traser)
   //  plano_delantero>0  plano_trasero>PlanoDelantero)
-  glFrustum(-Size_x * factor, Size_x * factor, -Size_y * factor,
-            Size_y * factor, Front_plane, Back_plane);
+  glFrustum(-Size_x, Size_x, -Size_y, Size_y, Front_plane, Back_plane);
 
   // HACER MULTPLICAR POR UN FACTOR
 }
@@ -171,7 +170,12 @@ void draw_objects() {
       break;
 
     case AMETRALLADORA:
-      ametralladora.draw(modo, 1.0, 0.0, 0.0, 5);
+
+      if (modo != SELECT)
+        ametralladora.draw(modo, 1.0, 0.0, 0.0, 5);
+      else
+        ametralladora.seleccion();
+
       break;
 
     case ESFERAEJERCICIO:
@@ -277,7 +281,6 @@ void draw(void) {
 
   // glutSwapBuffers(); // no vamos a utilizar el doble buffer
 
-
   if (cambioAOrto == 0) {
     glViewport(0, 0, Ancho, Alto);  // esto solo se haria en el inicialize sino
                                     // entonces se pierde lo q estaba
@@ -294,7 +297,7 @@ void draw(void) {
     clean_window();
     change_observer();
     ametralladora.seleccion();
-    }
+  }
   glFlush();  // ahora se copia dos veces | trasero + delantero
 }
 
@@ -412,6 +415,9 @@ void normal_key(unsigned char Tecla1, int x, int y) {
       break;
     case '6':
       modo = SOLID_SMOOTH;
+      break;
+    case '7':
+      modo = SELECT;
       break;
     case '9':
       cambioAOrto += 1;
@@ -651,18 +657,18 @@ void procesar_color(unsigned char color[3]) {
     }
   }
 
-  // for (i = 0; i < ametralladora.piezas; i++) {
-  //   if (color[0] == ametralladora.housing.color_select[i].r &&
-  //       color[1] == ametralladora.housing.color_select[i].g &&
-  //       color[2] == ametralladora.housing.color_select[i].r) {
-  //     if (ametralladora.housing.activo[i] == 0) {
-  //       ametralladora.housing.activo[i] = 1;
-  //     } else {
-  //       ametralladora.housing.activo[i] = 0;
-  //     }
-  //     glutPostRedisplay();
-  //   }
-  // }
+  for (i = 0; i < ametralladora.housing.piezas; i++) {
+    if (color[0] == ametralladora.housing.color_select[i].r &&
+        color[1] == ametralladora.housing.color_select[i].g &&
+        color[2] == ametralladora.housing.color_select[i].r) {
+      if (ametralladora.housing.activo[i] == 0) {
+        ametralladora.housing.activo[i] = 1;
+      } else {
+        ametralladora.housing.activo[i] = 0;
+      }
+      glutPostRedisplay();
+    }
+  }
 }
 
 //***************************************************************************
@@ -711,11 +717,19 @@ void clickRaton(int boton, int estado, int x, int y) {
   }
 
   if (boton == 3) {
-    factor *= 1.1;
+    if (cambioAOrto)
+      factor *= 1.1;
+    else
+      Observer_distance *= 1.1;
+
     glutPostRedisplay();
   }
   if (boton == 4) {
-    factor *= 0.9;
+    if (cambioAOrto)
+      factor *= 0.9;
+    else
+      Observer_distance *= 0.9;
+
     glutPostRedisplay();
   }
 }
@@ -725,7 +739,7 @@ void clickRaton(int boton, int estado, int x, int y) {
 void RatonMovido(int x, int y) {
   if (estadoRaton == 1) {
     Observer_angle_y = Observer_angle_y - (x - xc);
-    Observer_angle_x = Observer_angle_x + (y - yc); 
+    Observer_angle_x = Observer_angle_x + (y - yc);
     yc = y;
     xc = x;
     glutPostRedisplay();

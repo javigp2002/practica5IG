@@ -1301,7 +1301,7 @@ _housing::_housing() {
   cono.cambiarMaterial(gold);
 
   // seleccion
-  int color = 80;
+  int color = 50;
   piezas = 9;  // numero de piezas
   grosor_select = 2;
   color_pick = _vertex3f(0.0, 1.0, 0.0);  // verde
@@ -1442,7 +1442,6 @@ void _housing::draw(_modo modo, float r, float g, float b, float grosor,
   float transZBaseMango = (altoB * ALTURACILINDRO) / 2 - fondoBaseMango;
 
   if (activo[7])
-
     introduceEmbellecedor(transXBaseMango, transYBaseMango, transZBaseMango,
                           anchoBaseMango, altoBaseMango, fondoBaseMango, EDGES,
                           r_p, g_p, b_p, grosor_select);
@@ -1831,8 +1830,8 @@ _ametralladora::_ametralladora() {
   tamanio_pala = 0.15;
 
   // seleccion
-  int color = 80;
-  piezas = 3;  // numero de piezas
+  int color = 20;
+  piezas = 2;  // numero de piezas
   grosor_select = 2;
   color_pick = _vertex3f(1.0, 0.0, 0.0);  // rojo
   color_select.resize(piezas);
@@ -1874,15 +1873,15 @@ void _ametralladora::draw(_modo modo, float r, float g, float b, float grosor) {
   glRotatef(giro_base_up, rotacionX, 0, rotacionZ);
   glRotatef(giro_base, 0, 1, 0);
 
-  if (activo[1] == 1)
-    housing.draw(EDGES, r_p, g_p, b_p, grosor_select);
-  else
+  // if (activo[1] == 1)
+  //   housing.draw(EDGES, r_p, g_p, b_p, grosor_select);
+  // else
     housing.draw(modo, r, g, b, grosor, giro_mirilla);
 
   glTranslatef(0, 0, 3);
   glRotatef(giro_canion, 0, 0, 1);
 
-  if (activo[2] == 1)
+  if (activo[1] == 1)
     canon.draw(EDGES, r_p, g_p, b_p, grosor_select);
   else
     canon.draw(modo, r, g, b, grosor);
@@ -1903,14 +1902,15 @@ void _ametralladora::seleccion() {
   glPopMatrix();
 
   glPushMatrix();
-  color = color_select[1];
+  // color = color_select[1];
   float rotacionX = (giro_base_max - abs(giro_base)) / giro_base_max;
   float rotacionZ = 1 - rotacionX;
 
   if (giro_base > 0) rotacionZ *= -1;
   glRotatef(giro_base_up, rotacionX, 0, rotacionZ);
   glRotatef(giro_base, 0, 1, 0);
-  housing.draw(SELECT, color.r, color.g, color.b, 1, giro_mirilla);
+  // housing.draw(SELECT, color.r, color.g, color.b, 1, giro_mirilla);
+  housing.seleccion(giro_mirilla);
 
   glTranslatef(0, 0, 3);
   glRotatef(giro_canion, 0, 0, 1);
